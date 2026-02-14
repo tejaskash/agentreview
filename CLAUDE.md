@@ -1,0 +1,1 @@
+You will always refer to the AGENTS.md file in the root and every subdirectory for this project. Start with ./AGENTS.md
