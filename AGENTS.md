@@ -4,7 +4,31 @@
 
 ARV is a local CLI tool for collaborative code reviews between humans and AI agents. It manages review sessions tied to git branches, allowing humans to create review threads anchored to specific code regions and agents to read full context and provide fixes via patches.
 
-## Architecture
+## Monorepo Structure
+
+This is an npm workspaces monorepo managed by Turborepo.
+
+```
+.
+├── src/                    # CLI source code
+├── tests/                  # CLI tests
+├── vscode-extension/       # VS Code extension (separate package)
+│   ├── src/                # Extension source
+│   └── tests/              # Extension tests
+├── turbo.json              # Turborepo task config
+└── package.json            # Root package (CLI + workspaces)
+```
+
+**Two packages:**
+- **Root (`arv`)** — CLI tool. TypeScript + Commander + simple-git.
+- **`vscode-extension` (`arv-vscode`)** — VS Code extension. Imports core logic from the root package via `../../src/`.
+
+**Turbo commands:**
+- `npm run turbo:build` — build both packages
+- `npm run turbo:test` — test both packages
+- `npx turbo build/test` — equivalent direct invocations
+
+## CLI Architecture
 
 ```
 src/
@@ -61,13 +85,25 @@ All state lives in `.agentreview/` at the repo root (auto-added to `.gitignore`)
 | `arv status` | Show session summary and thread counts |
 | `arv diff [--stat]` | Show branch diff |
 
+## VS Code Extension
+
+The extension in `vscode-extension/` provides a full GUI for ARV inside VS Code. See `vscode-extension/AGENTS.md` for its architecture and file details. Key points:
+
+- **CoreBridge** wraps all CLI core logic — the extension imports directly from `../../src/`.
+- **EventBus** (singleton) coordinates UI updates across providers.
+- Built with esbuild (CJS bundle), tested with Vitest + a vscode mock.
+
 ## Building and Testing
 
 ```sh
 npm install
-npm run build        # TypeScript → dist/
-npm test             # Run full test suite
+npm run build        # TypeScript → dist/ (CLI only)
+npm test             # Run CLI test suite
 npx tsx src/cli.ts   # Run CLI in development
+
+# Monorepo-wide via turbo
+npm run turbo:build  # Build CLI + extension
+npm run turbo:test   # Test CLI + extension
 ```
 
 ## Conventions

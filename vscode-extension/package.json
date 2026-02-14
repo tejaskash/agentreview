@@ -1,0 +1,82 @@
+{
+  "name": "arv-vscode",
+  "displayName": "Agent Review (arv)",
+  "description": "AI code review workflow — review threads anchored to code regions",
+  "version": "0.1.0",
+  "publisher": "arv",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "workspaceContains:**/.agentreview/session.json"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "arv",
+          "title": "Agent Review",
+          "icon": "media/icons/arv-activity.svg"
+        }
+      ]
+    },
+    "views": {
+      "arv": [
+        {
+          "id": "arvThreads",
+          "name": "Threads"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "arv.initSession",
+        "title": "ARV: Initialize Review Session"
+      },
+      {
+        "command": "arv.addThread",
+        "title": "ARV: Add Thread"
+      },
+      {
+        "command": "arv.exportBundle",
+        "title": "ARV: Export for Agent"
+      },
+      {
+        "command": "arv.applyPatch",
+        "title": "ARV: Apply Patch"
+      },
+      {
+        "command": "arv.showStatus",
+        "title": "ARV: Show Status"
+      },
+      {
+        "command": "arv.openThread",
+        "title": "ARV: Open Thread"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "arv.addThread",
+          "when": "editorHasSelection",
+          "group": "arv@1"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "watch": "node esbuild.config.mjs --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "vitest": "^2.1.0",
+    "typescript": "^5.6.0"
+  }
+}

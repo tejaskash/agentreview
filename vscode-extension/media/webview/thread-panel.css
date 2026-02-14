@@ -1,0 +1,185 @@
+:root {
+  --bg: var(--vscode-editor-background, #1e1e1e);
+  --fg: var(--vscode-editor-foreground, #d4d4d4);
+  --border: var(--vscode-panel-border, #404040);
+  --input-bg: var(--vscode-input-background, #3c3c3c);
+  --input-fg: var(--vscode-input-foreground, #cccccc);
+  --btn-bg: var(--vscode-button-background, #0e639c);
+  --btn-fg: var(--vscode-button-foreground, #ffffff);
+  --badge-bg: var(--vscode-badge-background, #4d4d4d);
+  --badge-fg: var(--vscode-badge-foreground, #ffffff);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--vscode-font-family, -apple-system, sans-serif);
+  font-size: var(--vscode-font-size, 13px);
+  color: var(--fg);
+  background: var(--bg);
+  padding: 16px;
+}
+
+.thread-panel {
+  max-width: 700px;
+}
+
+.header h2 {
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.85em;
+  font-weight: 600;
+  background: var(--badge-bg);
+  color: var(--badge-fg);
+}
+
+.severity-must-fix { background: #c92a2a; }
+.severity-suggestion { background: #1971c2; }
+.severity-comment { background: #495057; }
+.status-open { background: #e2b340; color: #000; }
+.status-needs-human { background: #4dabf7; color: #000; }
+.status-addressed { background: #69db7c; color: #000; }
+.status-resolved { background: #69db7c; color: #000; }
+.status-orphaned { background: #ff6b6b; color: #000; }
+
+.anchor-block {
+  margin-bottom: 20px;
+}
+
+.anchor-label {
+  font-size: 0.85em;
+  color: #888;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.code-block {
+  background: var(--vscode-textCodeBlock-background, #2d2d2d);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: var(--vscode-editor-font-family, 'Consolas', monospace);
+  font-size: var(--vscode-editor-font-size, 13px);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.code-line {
+  min-height: 1.4em;
+}
+
+.code-line.dim {
+  opacity: 0.4;
+}
+
+.messages {
+  margin-bottom: 20px;
+}
+
+.message {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  max-width: 85%;
+  border: 1px solid var(--border);
+}
+
+.message.left {
+  margin-right: auto;
+  background: var(--vscode-textCodeBlock-background, #2d2d2d);
+}
+
+.message.right {
+  margin-left: auto;
+  background: rgba(14, 99, 156, 0.2);
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8em;
+  margin-bottom: 6px;
+  color: #888;
+}
+
+.role {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.message-body {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.reply-section {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+textarea {
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--input-fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+  font-family: inherit;
+  font-size: inherit;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+textarea:focus {
+  outline: 1px solid var(--btn-bg);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  background: var(--badge-bg);
+  color: var(--badge-fg);
+}
+
+.btn.primary {
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+}
+
+.btn.success {
+  background: #2b8a3e;
+  color: #fff;
+}
+
+.btn.warning {
+  background: #e67700;
+  color: #fff;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}

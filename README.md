@@ -116,13 +116,101 @@ All review state is stored locally in `.agentreview/` at the repo root (automati
     └── ...
 ```
 
+## VS Code Extension
+
+The `vscode-extension/` directory contains a VS Code extension that provides a full graphical interface for ARV. It adds:
+
+- **Activity bar panel** with a tree view of all review threads grouped by status
+- **Gutter decorations** and hover tooltips on anchored lines
+- **Thread panels** (webview) for reading conversations and replying
+- **Command palette** commands for init, add thread, export, apply patch, and status
+- **Right-click context menu** to add a thread from a selection
+- **File watcher** that auto-refreshes the UI when `.agentreview/` data changes on disk
+
+The extension imports core logic directly from the CLI package — no duplication of business logic.
+
+## Claude Code Integration
+
+ARV ships with a `/arv` skill for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that lets an agent read all review threads and fix them automatically — no manual export/apply cycle needed.
+
+### Install the `/arv` skill
+
+Copy the skill file into your global Claude Code skills directory:
+
+```sh
+mkdir -p ~/.claude/skills/arv
+cp docs/skills/arv/SKILL.md ~/.claude/skills/arv/SKILL.md
+```
+
+The skill is now available in every repo.
+
+### Usage
+
+1. Start a review session and add threads as usual:
+
+```sh
+arv init
+arv thread add src/auth.ts 42-58 -m "This auth check skips token expiry" --severity must-fix
+```
+
+2. Open Claude Code in the same repo and type:
+
+```
+/arv
+```
+
+Claude will automatically:
+- Export the current review bundle
+- Read all actionable threads (open, addressed, needs-human)
+- Fix each issue in priority order (must-fix > should-fix > nit > question)
+- Reply to each thread explaining what was changed
+- Print a summary of everything addressed
+
+3. You can pass additional context to filter:
+
+```
+/arv only must-fix threads
+/arv skip nits
+/arv only fix threads in src/auth.ts
+```
+
+4. After Claude is done, check progress:
+
+```sh
+arv status
+arv thread list
+```
+
+### Requirements
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
+- `arv` available on PATH (via `npm link` or global install)
+- An active ARV session in the current repo (`.agentreview/` directory exists)
+
+## Monorepo Structure
+
+This is an npm workspaces monorepo managed by [Turborepo](https://turbo.build/).
+
+```
+.
+├── src/                    # CLI source (TypeScript + Commander)
+├── tests/                  # CLI tests (Vitest)
+├── vscode-extension/       # VS Code extension package
+├── turbo.json              # Turborepo task definitions
+└── package.json            # Root package with workspaces config
+```
+
 ## Development
 
 ```sh
-npm install            # Install dependencies
-npm run build          # Compile TypeScript to dist/
-npm test               # Run the full test suite
-npm run test:watch     # Run tests in watch mode
+npm install            # Install all dependencies (both packages)
+npm run build          # Compile CLI TypeScript to dist/
+npm test               # Run the CLI test suite
+npm run test:watch     # Run CLI tests in watch mode
+
+# Monorepo-wide commands (via Turborepo)
+npm run turbo:build    # Build CLI + extension
+npm run turbo:test     # Test CLI + extension
 ```
 
 ## License
