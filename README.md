@@ -1,55 +1,81 @@
 # ARV — Agent Review
 
-A local CLI tool for collaborative code reviews between humans and AI agents.
+A code review tool for the age of AI-generated code. VS Code extension + CLI.
 
 ## The Problem
 
-AI agents can write code, but code review is still a back-and-forth conversation. Today, that conversation happens in chat windows or PR comments that agents can't easily parse — there's no structured way to point an agent at specific lines, explain what's wrong, get a fix back, and track whether each issue was actually addressed. You end up copy-pasting diffs, re-explaining context, and manually checking if the agent's patch even touched the right code.
+AI agents generate a lot of code — fast. But the review process hasn't kept up. GitHub PR reviews, AI-assisted or not, tend to skim the surface: style nits, obvious bugs, rubber stamps. The hard problems — logic gaps, security holes, architectural drift — slip through because there's no structured way to anchor feedback to specific code, track whether it was actually fixed, and close the loop.
+
+You should be reviewing your own code. ARV makes that practical.
 
 ## The Solution
 
-ARV gives that review conversation a structured, git-aware format. You anchor comments to exact lines of code, export the full review context as a single JSON bundle an agent can consume, and apply the agent's patch back — with automatic tracking of which threads were addressed, which need another look, and which got lost in the diff.
+ARV gives you a structured, git-aware review workflow. Open a review session, anchor comments directly to lines of code, mark issues as `comment` or `must-fix`, and track resolution — all inside VS Code or from the command line. When you're working with an AI agent, export the review context as a single JSON bundle or let the agent read the review files directly.
 
-## Install
+## Quick Start (VS Code)
+
+### 1. Install
+
+```sh
+git clone <this repo>
+cd agentreview
+npm install
+npm run turbo:build
+
+# Install the VS Code extension
+cd vscode-extension
+vsce package
+code --install-extension arv-vscode-*.vsix
+```
+
+If you don't have `vsce`: `npm install -g @vscode/vsce`
+
+### 2. Start a review
+
+Open your project in VS Code. Run **ARV: Initialize Review Session** from the command palette (`Cmd+Shift+P`). ARV auto-detects your base branch.
+
+### 3. Add review comments
+
+Select code in the editor and type a comment in the inline comment widget that appears — it creates a thread anchored to that code. Threads default to `comment` severity. Click the flame icon (or the badge in the comment body) to escalate to `must-fix`.
+
+You can also right-click a selection and choose **ARV: Add Thread**, or use the keyboard shortcut `Cmd+Shift+T`.
+
+### 4. Track progress
+
+The **Agent Review** panel in the activity bar shows all threads grouped by status. Gutter icons and hover tooltips mark anchored lines. The status bar shows open thread counts.
+
+### 5. Let an agent fix it
+
+If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), install the `/arv` skill (see below) and type `/arv` — the agent reads all threads and fixes them in priority order.
+
+For other agents, export a bundle: **ARV: Export for Agent** from the command palette, then feed the JSON to your agent.
+
+## Quick Start (CLI)
 
 ```sh
 npm install
 npm run build
 npm link   # makes `arv` available globally
-```
 
-For development without building:
-
-```sh
-npx tsx src/cli.ts <command>
-```
-
-## Quick Start
-
-```sh
-# 1. On your feature branch, start a review session
+# Start a review session on your feature branch
 arv init
 
-# 2. Add review comments anchored to code
+# Add review comments anchored to code
 arv thread add src/auth.ts 42-58 -m "This auth check skips token expiry" --severity must-fix
 arv thread add src/api.ts 10 -m "Consider adding rate limiting"
 
-# 3. See what you've got
+# Check progress
 arv status
 arv thread list
 
-# 4. Export a bundle for your AI agent
+# Export for a sandboxed agent, or let an agent read .agentreview/ directly
 arv export -o review-bundle.json
 
-# 5. Hand the bundle to your agent. It reads the threads, generates a patch.
-#    Then apply the patch:
+# Apply the agent's patch — threads auto-update based on what changed
 arv apply agent-fix.diff
-
-# 6. Check progress — threads auto-update based on what changed
-arv status
 ```
 
-## Commands
+## Commands (CLI)
 
 ### Session
 
@@ -58,6 +84,7 @@ arv status
 | `arv init [--base <branch>]` | Start a review session. Auto-detects `main` or `master` as the base branch. |
 | `arv status` | Show session info, thread counts by status, and run history. |
 | `arv diff [--stat]` | Show the diff between base and head branches. |
+| `arv end` | End the current review session. |
 
 ### Threads
 
@@ -76,9 +103,8 @@ arv status
 |---------|-------------|
 | `arv export [-o <file>]` | Export a JSON bundle for sandboxed agents that can't access the filesystem. Writes to stdout if no file given. |
 | `arv apply <patch> [--dry-run]` | Apply a unified diff patch. Re-anchors all threads to their new positions and updates statuses automatically. |
-| `arv end` | End the current review session. |
 
-> **Tip:** Agents with filesystem access (like Claude Code) don't need the export step — they can read `.agentreview/session.json` and `.agentreview/threads.json` directly. The export command exists for sandboxed agents that receive a single JSON blob.
+> **Tip:** Agents with filesystem access (like Claude Code) don't need the export step — they can read `.agentreview/session.json` and `.agentreview/threads.json` directly.
 
 ## How It Works
 
@@ -98,14 +124,6 @@ Threads move through statuses automatically:
 
 Some transitions happen automatically: replying as a human to a `needs-human` thread moves it to `open`. Applying a patch that changes the anchored code moves the thread to `addressed`.
 
-### Export Bundles
-
-The export bundle is a self-contained JSON file with everything an agent needs:
-
-- The full diff between base and head branches
-- All actionable threads (open, addressed, needs-human) with their anchors and conversation history
-- A prompt hint with instructions for the agent
-
 ### Data Storage
 
 All review state is stored locally in `.agentreview/` at the repo root (automatically added to `.gitignore`):
@@ -121,51 +139,33 @@ All review state is stored locally in `.agentreview/` at the repo root (automati
 
 ## VS Code Extension
 
-The `vscode-extension/` directory contains a VS Code extension that provides a full graphical interface for ARV. It adds:
+The extension provides the full ARV experience inside VS Code:
 
-- **Activity bar panel** with a tree view of all review threads grouped by status
-- **Gutter decorations** and hover tooltips on anchored lines
-- **Thread panels** (webview) for reading conversations and replying
-- **Command palette** commands for init, add thread, export, apply patch, and status
-- **Right-click context menu** to add a thread from a selection
-- **File watcher** that auto-refreshes the UI when `.agentreview/` data changes on disk
+- **Inline comments** — anchor review threads to code selections via the Comment API
+- **Severity toggle** — clickable badge in the comment body to switch between `comment` and `must-fix`
+- **Activity bar panel** — tree view of all threads grouped by status
+- **Gutter decorations** — icons and hover tooltips on anchored lines
+- **Command palette** — init, add thread, export, apply patch, status, end session
+- **Right-click menu** — add a thread from any selection
+- **File watcher** — auto-refreshes when `.agentreview/` data changes on disk
+- **Multi-repo** — open a parent folder with multiple git repos and ARV discovers all sessions
 
-The extension bundles the core logic via esbuild — **the CLI does not need to be installed** for the extension to work. It also supports **multi-repo workspaces**: open a parent folder containing multiple git repos with ARV sessions and the extension discovers and manages all of them.
-
-### Install the Extension
-
-```sh
-cd vscode-extension
-npm run build
-vsce package          # produces arv-vscode-<version>.vsix
-code --install-extension arv-vscode-*.vsix
-```
-
-If you don't have `vsce`, install it first: `npm install -g @vscode/vsce`
+The extension bundles the core logic via esbuild — **the CLI does not need to be installed**.
 
 ## Claude Code Integration
 
-ARV ships with a `/arv` skill for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that lets an agent read all review threads and fix them automatically — no export step needed. The agent reads `.agentreview/` directly from the filesystem.
+ARV ships with a `/arv` skill for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that lets an agent read all review threads and fix them automatically — no export step needed.
 
 ### Install the `/arv` skill
-
-Copy the skill file into your global Claude Code skills directory:
 
 ```sh
 mkdir -p ~/.claude/skills/arv
 cp docs/skills/arv/SKILL.md ~/.claude/skills/arv/SKILL.md
 ```
 
-The skill is now available in every repo.
-
 ### Usage
 
-1. Start a review session and add threads as usual:
-
-```sh
-arv init
-arv thread add src/auth.ts 42-58 -m "This auth check skips token expiry" --severity must-fix
-```
+1. Start a review session and add threads (via VS Code or CLI)
 
 2. Open Claude Code in the same repo and type:
 
@@ -173,14 +173,9 @@ arv thread add src/auth.ts 42-58 -m "This auth check skips token expiry" --sever
 /arv
 ```
 
-Claude will automatically:
-- Read `.agentreview/session.json` and `.agentreview/threads.json` directly
-- Identify all actionable threads (open, addressed, needs-human)
-- Fix each issue in priority order (must-fix > comment)
-- Reply to each thread explaining what was changed
-- Print a summary of everything addressed
+Claude will read all threads, fix issues in priority order (must-fix first), reply to each thread, and print a summary.
 
-3. You can pass additional context to filter:
+3. Filter if needed:
 
 ```
 /arv only must-fix threads
@@ -188,43 +183,14 @@ Claude will automatically:
 /arv only fix threads in src/auth.ts
 ```
 
-4. After Claude is done, check progress:
-
-```sh
-arv status
-arv thread list
-```
-
-### Requirements
-
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
-- `arv` CLI on PATH is optional — the skill reads `.agentreview/` files directly, but uses the CLI for replying to threads if available
-- An active ARV session in the current repo (`.agentreview/` directory exists)
-
-## Monorepo Structure
-
-This is an npm workspaces monorepo managed by [Turborepo](https://turbo.build/).
-
-```
-.
-├── src/                    # CLI source (TypeScript + Commander)
-├── tests/                  # CLI tests (Vitest)
-├── vscode-extension/       # VS Code extension package
-├── turbo.json              # Turborepo task definitions
-└── package.json            # Root package with workspaces config
-```
-
 ## Development
 
 ```sh
 npm install            # Install all dependencies (both packages)
-npm run build          # Compile CLI TypeScript to dist/
-npm test               # Run the CLI test suite
-npm run test:watch     # Run CLI tests in watch mode
-
-# Monorepo-wide commands (via Turborepo)
 npm run turbo:build    # Build CLI + extension
 npm run turbo:test     # Test CLI + extension
+npm run build          # CLI only
+npm test               # CLI tests only
 ```
 
 ## License
