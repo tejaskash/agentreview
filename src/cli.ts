@@ -14,6 +14,8 @@ import { exportCommand } from "./commands/export.js";
 import { applyCommand } from "./commands/apply.js";
 import { statusCommand } from "./commands/status.js";
 import { diffCommand } from "./commands/diff.js";
+import { endCommand } from "./commands/end.js";
+import { threadResolveAllCommand } from "./commands/thread.js";
 
 const program = new Command();
 
@@ -42,7 +44,7 @@ thread
   .requiredOption("-m, --message <text>", "Comment message")
   .option(
     "--severity <level>",
-    "Thread severity (comment, suggestion, must-fix)",
+    "Thread severity (comment, must-fix)",
     "comment"
   )
   .action((file, lineRange, opts) =>
@@ -88,6 +90,13 @@ thread
   .description("Reopen a resolved thread")
   .action((id) => threadReopenCommand(cwd, id));
 
+thread
+  .command("resolve-all")
+  .description("Bulk resolve threads")
+  .option("--status <status>", "Only resolve threads with this status")
+  .option("--file <path>", "Only resolve threads in this file")
+  .action((opts) => threadResolveAllCommand(cwd, opts));
+
 // arv export
 program
   .command("export")
@@ -107,6 +116,12 @@ program
   .command("status")
   .description("Show review session status")
   .action(() => statusCommand(cwd));
+
+// arv end
+program
+  .command("end")
+  .description("End the current review session")
+  .action(() => endCommand(cwd));
 
 // arv diff
 program

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { StatusBarProvider } from "../../src/providers/status-bar.js";
 import { CoreBridge } from "../../src/core-bridge.js";
 import { createTestRepo, cleanupTestRepo } from "../../../tests/helpers.js";
+import { mockBridgeManager } from "./bridge-manager-mock.js";
 
 describe("StatusBarProvider", () => {
   let repoRoot: string;
@@ -17,7 +18,7 @@ describe("StatusBarProvider", () => {
   });
 
   it("hides when no session exists", () => {
-    const provider = new StatusBarProvider(bridge);
+    const provider = new StatusBarProvider(mockBridgeManager(repoRoot, bridge));
     // status bar item's hide() was called (no session)
     // Provider should be created without error
     expect(provider).toBeDefined();
@@ -47,7 +48,7 @@ describe("StatusBarProvider", () => {
     });
     bridge.resolveThread("t-2");
 
-    const provider = new StatusBarProvider(bridge);
+    const provider = new StatusBarProvider(mockBridgeManager(repoRoot, bridge));
     // The provider's update() would have run, setting text
     // We verify it doesn't throw
     provider.update();
@@ -65,7 +66,7 @@ describe("StatusBarProvider", () => {
       headCommit: headCommit!,
     });
 
-    const provider = new StatusBarProvider(bridge);
+    const provider = new StatusBarProvider(mockBridgeManager(repoRoot, bridge));
     provider.update();
     expect(provider).toBeDefined();
     provider.dispose();

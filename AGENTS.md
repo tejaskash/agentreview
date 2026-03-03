@@ -2,7 +2,7 @@
 
 ## Project Purpose
 
-ARV is a local CLI tool for collaborative code reviews between humans and AI agents. It manages review sessions tied to git branches, allowing humans to create review threads anchored to specific code regions and agents to read full context and provide fixes via patches.
+ARV is a local CLI tool + VS Code extension for collaborative code reviews between humans and AI agents. It manages review sessions tied to git branches, allowing humans to create review threads anchored to specific code regions and agents to read full context and provide fixes via patches.
 
 ## Monorepo Structure
 
@@ -15,13 +15,14 @@ This is an npm workspaces monorepo managed by Turborepo.
 ├── vscode-extension/       # VS Code extension (separate package)
 │   ├── src/                # Extension source
 │   └── tests/              # Extension tests
+├── docs/skills/arv/        # Claude Code /arv skill
 ├── turbo.json              # Turborepo task config
 └── package.json            # Root package (CLI + workspaces)
 ```
 
 **Two packages:**
 - **Root (`arv`)** — CLI tool. TypeScript + Commander + simple-git.
-- **`vscode-extension` (`arv-vscode`)** — VS Code extension. Imports core logic from the root package via `../../src/`.
+- **`vscode-extension` (`arv-vscode`)** — VS Code extension. Bundles core logic from `../../src/` via esbuild — **does not require the CLI to be installed**.
 
 **Turbo commands:**
 - `npm run turbo:build` — build both packages
@@ -57,20 +58,32 @@ All state lives in `.agentreview/` at the repo root (auto-added to `.gitignore`)
 - `threads.json` — array of review threads, each with anchors, messages, severity, status
 - `runs/` — export snapshots and patch application records (`run-001.json`, etc.)
 
+**Agents with filesystem access can read these files directly** — no export step needed. The export command exists for sandboxed agents that receive a single JSON blob.
+
 ## Key Concepts
 
 - **Session:** A review tied to a feature branch vs a base branch. One session at a time.
-- **Thread:** A review comment anchored to a line range in a file. Has severity (`comment`, `suggestion`, `must-fix`) and status (`open`, `needs-human`, `addressed`, `resolved`, `orphaned`).
+- **Thread:** A review comment anchored to a line range in a file. Has severity (`comment`, `must-fix`) and status (`open`, `needs-human`, `addressed`, `resolved`, `orphaned`).
 - **Anchor:** A code region identified by line numbers + surrounding context text. Supports fuzzy re-matching via LCS (60% similarity threshold) after patches are applied.
-- **Export Bundle:** JSON payload containing the diff, all actionable threads, and a prompt hint — designed to be consumed by an AI agent.
+- **Export Bundle:** JSON payload containing the diff, all actionable threads, and a prompt hint — designed for sandboxed agents without filesystem access.
 - **Run Record:** Tracks each export/apply cycle for auditability.
 
 ## Typical Workflow
 
+### Human + CLI agent (with filesystem access)
+
 1. `arv init` — start session on a feature branch
 2. `arv thread add <file> <lines> -m <msg>` — create review threads
-3. `arv export -o bundle.json` — export context for an agent
-4. Agent reads bundle, generates a unified diff patch, and replies to threads
+3. Agent reads `.agentreview/session.json` and `.agentreview/threads.json` directly
+4. Agent makes fixes, replies via `arv thread reply <id> -m '...' --role agent`
+5. `arv status` — check progress
+
+### Human + sandboxed agent (no filesystem access)
+
+1. `arv init` — start session on a feature branch
+2. `arv thread add <file> <lines> -m <msg>` — create review threads
+3. `arv export -o bundle.json` — export context for the agent
+4. Agent reads bundle, generates a unified diff patch
 5. `arv apply patch.diff` — apply patch, automatically re-anchor threads
 6. `arv status` — check progress
 
@@ -80,16 +93,19 @@ All state lives in `.agentreview/` at the repo root (auto-added to `.gitignore`)
 |---------|---------|
 | `arv init [--base]` | Start review session (auto-detects main/master) |
 | `arv thread add/reply/list/show/resolve/reopen` | Thread CRUD and status management |
-| `arv export [-o file]` | Generate agent-consumable bundle |
+| `arv export [-o file]` | Export bundle for sandboxed agents |
 | `arv apply <patch> [--dry-run]` | Apply patch, re-anchor threads |
 | `arv status` | Show session summary and thread counts |
 | `arv diff [--stat]` | Show branch diff |
+| `arv end` | End the review session |
 
 ## VS Code Extension
 
 The extension in `vscode-extension/` provides a full GUI for ARV inside VS Code. See `vscode-extension/AGENTS.md` for its architecture and file details. Key points:
 
-- **CoreBridge** wraps all CLI core logic — the extension imports directly from `../../src/`.
+- **BridgeManager** discovers and manages multiple repos in a workspace. Each repo gets its own `CoreBridge` and `FileWatcher`.
+- **CoreBridge** wraps all CLI core logic — the extension bundles it via esbuild (no CLI install needed).
+- **Multi-repo support** — opening a parent folder with multiple git repos auto-discovers all ARV sessions.
 - **EventBus** (singleton) coordinates UI updates across providers.
 - Built with esbuild (CJS bundle), tested with Vitest + a vscode mock.
 

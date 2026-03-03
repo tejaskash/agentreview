@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Command handlers registered in the VS Code command palette and context menus. Each is an async function taking a `CoreBridge` instance.
+Command handlers registered in the VS Code command palette and context menus. Each is an async function taking a `CoreBridge` instance. The bridge is resolved by `extension.ts` from BridgeManager before the handler is called.
 
 ## Files
 
@@ -19,3 +19,4 @@ Command handlers registered in the VS Code command palette and context menus. Ea
 - All handlers emit event bus events after mutating data (`emitThreadsChanged`, `emitSessionChanged`).
 - Guards (no session, no editor, etc.) show `vscode.window.showWarningMessage` and return early.
 - User input via `showInputBox`, `showQuickPick`, `showOpenDialog`, `showSaveDialog`.
+- Handlers don't resolve which bridge to use — that's done by `extension.ts` using BridgeManager.

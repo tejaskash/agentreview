@@ -7,6 +7,7 @@ import {
   getThread,
   resolveThread,
   reopenThread,
+  bulkResolveThreads,
 } from "../core/threads.js";
 import type { Severity, ThreadStatus, MessageRole } from "../types.js";
 
@@ -138,6 +139,28 @@ export function threadReopenCommand(
 ): void {
   const thread = reopenThread(repoRoot, threadId);
   console.log(chalk.yellow(`Thread ${chalk.bold(thread.id)} reopened.`));
+}
+
+export function threadResolveAllCommand(
+  repoRoot: string,
+  opts: { status?: ThreadStatus; file?: string }
+): void {
+  const resolved = bulkResolveThreads(repoRoot, {
+    status: opts.status as ThreadStatus | undefined,
+    file: opts.file,
+  });
+
+  if (resolved.length === 0) {
+    console.log(chalk.dim("No matching threads to resolve."));
+    return;
+  }
+
+  console.log(
+    chalk.green(`Resolved ${chalk.bold(String(resolved.length))} thread(s).`)
+  );
+  for (const t of resolved) {
+    console.log(`  ${t.id}  ${t.file}:${t.anchor.startLine}-${t.anchor.endLine}`);
+  }
 }
 
 function parseLineRange(range: string): { start: number; end: number } {

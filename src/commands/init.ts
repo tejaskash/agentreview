@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { createSession, sessionExists, addToGitignore } from "../core/session.js";
+import { createSession, sessionExists, loadSession, addToGitignore } from "../core/session.js";
 import { isGitRepo, getCurrentBranch, getCommitHash, branchExists } from "../core/git.js";
 
 export async function initCommand(
@@ -13,11 +13,16 @@ export async function initCommand(
   }
 
   if (sessionExists(repoRoot)) {
-    console.error(
-      chalk.yellow("A review session already exists. Delete .agentreview/ to start fresh.")
-    );
-    process.exitCode = 1;
-    return;
+    const existing = loadSession(repoRoot);
+    if (existing.status === "active") {
+      console.error(
+        chalk.yellow("A review session is active. Run `arv end` first, or delete .agentreview/ to start fresh.")
+      );
+      process.exitCode = 1;
+      return;
+    }
+    // Session is completed — allow re-init (overwrite)
+    console.log(chalk.dim("Previous session was completed. Starting a new session."));
   }
 
   const headBranch = await getCurrentBranch(repoRoot);

@@ -75,6 +75,13 @@ export function saveSession(repoRoot: string, session: Session): void {
   fs.writeFileSync(getSessionPath(repoRoot), JSON.stringify(session, null, 2));
 }
 
+export function endSession(repoRoot: string): Session {
+  const session = loadSession(repoRoot);
+  session.status = "completed";
+  saveSession(repoRoot, session);
+  return session;
+}
+
 export function addToGitignore(repoRoot: string): void {
   const gitignorePath = path.join(repoRoot, ".gitignore");
   const entry = AGENTREVIEW_DIR;

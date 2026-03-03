@@ -32,7 +32,7 @@ arv init
 
 # 2. Add review comments anchored to code
 arv thread add src/auth.ts 42-58 -m "This auth check skips token expiry" --severity must-fix
-arv thread add src/api.ts 10 -m "Consider adding rate limiting" --severity suggestion
+arv thread add src/api.ts 10 -m "Consider adding rate limiting"
 
 # 3. See what you've got
 arv status
@@ -63,7 +63,7 @@ arv status
 
 | Command | Description |
 |---------|-------------|
-| `arv thread add <file> <line-range> -m <message> [--severity <level>]` | Create a review thread anchored to a line or range (e.g. `42` or `42-58`). Severity: `comment`, `suggestion`, `must-fix`. |
+| `arv thread add <file> <line-range> -m <message> [--severity <level>]` | Create a review thread anchored to a line or range (e.g. `42` or `42-58`). Severity: `comment`, `must-fix`. |
 | `arv thread reply <id> -m <message> [--role <role>] [--status <status>]` | Reply to a thread. Role is `human` or `agent`. Optionally set status. |
 | `arv thread list [--status <status>] [--file <path>]` | List threads, optionally filtered. |
 | `arv thread show <id>` | Show a thread's full conversation and anchor context. |
@@ -74,8 +74,11 @@ arv status
 
 | Command | Description |
 |---------|-------------|
-| `arv export [-o <file>]` | Export a JSON bundle containing the diff, all actionable threads, and a prompt hint. Writes to stdout if no file given. |
+| `arv export [-o <file>]` | Export a JSON bundle for sandboxed agents that can't access the filesystem. Writes to stdout if no file given. |
 | `arv apply <patch> [--dry-run]` | Apply a unified diff patch. Re-anchors all threads to their new positions and updates statuses automatically. |
+| `arv end` | End the current review session. |
+
+> **Tip:** Agents with filesystem access (like Claude Code) don't need the export step — they can read `.agentreview/session.json` and `.agentreview/threads.json` directly. The export command exists for sandboxed agents that receive a single JSON blob.
 
 ## How It Works
 
@@ -127,11 +130,22 @@ The `vscode-extension/` directory contains a VS Code extension that provides a f
 - **Right-click context menu** to add a thread from a selection
 - **File watcher** that auto-refreshes the UI when `.agentreview/` data changes on disk
 
-The extension imports core logic directly from the CLI package — no duplication of business logic.
+The extension bundles the core logic via esbuild — **the CLI does not need to be installed** for the extension to work. It also supports **multi-repo workspaces**: open a parent folder containing multiple git repos with ARV sessions and the extension discovers and manages all of them.
+
+### Install the Extension
+
+```sh
+cd vscode-extension
+npm run build
+vsce package          # produces arv-vscode-<version>.vsix
+code --install-extension arv-vscode-*.vsix
+```
+
+If you don't have `vsce`, install it first: `npm install -g @vscode/vsce`
 
 ## Claude Code Integration
 
-ARV ships with a `/arv` skill for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that lets an agent read all review threads and fix them automatically — no manual export/apply cycle needed.
+ARV ships with a `/arv` skill for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that lets an agent read all review threads and fix them automatically — no export step needed. The agent reads `.agentreview/` directly from the filesystem.
 
 ### Install the `/arv` skill
 
@@ -160,9 +174,9 @@ arv thread add src/auth.ts 42-58 -m "This auth check skips token expiry" --sever
 ```
 
 Claude will automatically:
-- Export the current review bundle
-- Read all actionable threads (open, addressed, needs-human)
-- Fix each issue in priority order (must-fix > should-fix > nit > question)
+- Read `.agentreview/session.json` and `.agentreview/threads.json` directly
+- Identify all actionable threads (open, addressed, needs-human)
+- Fix each issue in priority order (must-fix > comment)
 - Reply to each thread explaining what was changed
 - Print a summary of everything addressed
 
@@ -170,7 +184,7 @@ Claude will automatically:
 
 ```
 /arv only must-fix threads
-/arv skip nits
+/arv skip comments
 /arv only fix threads in src/auth.ts
 ```
 
@@ -184,7 +198,7 @@ arv thread list
 ### Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
-- `arv` available on PATH (via `npm link` or global install)
+- `arv` CLI on PATH is optional — the skill reads `.agentreview/` files directly, but uses the CLI for replying to threads if available
 - An active ARV session in the current repo (`.agentreview/` directory exists)
 
 ## Monorepo Structure

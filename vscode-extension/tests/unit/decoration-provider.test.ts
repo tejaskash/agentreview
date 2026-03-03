@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { DecorationProvider } from "../../src/providers/decoration-provider.js";
 import { CoreBridge } from "../../src/core-bridge.js";
 import { createTestRepo, cleanupTestRepo } from "../../../tests/helpers.js";
+import { mockBridgeManager } from "./bridge-manager-mock.js";
 import * as vscode from "vscode";
 import path from "node:path";
 
@@ -21,7 +22,7 @@ describe("DecorationProvider", () => {
       headBranch: "feature-x",
       headCommit: headCommit!,
     });
-    provider = new DecorationProvider(bridge, repoRoot);
+    provider = new DecorationProvider(mockBridgeManager(repoRoot, bridge), repoRoot);
   });
 
   afterEach(() => {

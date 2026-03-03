@@ -220,6 +220,8 @@ export const workspace = {
     lineAt: (_line: number) => ({ text: "", range: new Range(0, 0, 0, 0) }),
     lineCount: 0,
   }),
+  findFiles: async (_include: any, _exclude?: any) => [] as Uri[],
+  onDidChangeWorkspaceFolders: new EventEmitter<any>().event,
   fs: {
     readFile: async (_uri: Uri) => new Uint8Array(),
     writeFile: async (_uri: Uri, _content: Uint8Array) => {},
@@ -273,6 +275,53 @@ export enum OverviewRulerLane {
   Right = 4,
   Full = 7,
 }
+
+export enum CommentMode {
+  Editing = 0,
+  Preview = 1,
+}
+
+export enum CommentThreadState {
+  Unresolved = 0,
+  Resolved = 1,
+}
+
+export enum CommentThreadCollapsibleState {
+  Collapsed = 0,
+  Expanded = 1,
+}
+
+// Stub comments
+export const comments = {
+  createCommentController: (_id: string, _label: string) => {
+    const threads: any[] = [];
+    return {
+      id: _id,
+      label: _label,
+      commentingRangeProvider: undefined as any,
+      options: undefined as any,
+      createCommentThread: (uri: Uri, range: Range, comments: any[]) => {
+        const thread = {
+          uri,
+          range,
+          comments,
+          label: "",
+          contextValue: "",
+          canReply: true,
+          state: CommentThreadState.Unresolved,
+          collapsibleState: CommentThreadCollapsibleState.Expanded,
+          dispose: () => {
+            const idx = threads.indexOf(thread);
+            if (idx >= 0) threads.splice(idx, 1);
+          },
+        };
+        threads.push(thread);
+        return thread;
+      },
+      dispose: () => {},
+    };
+  },
+};
 
 export const env = {
   clipboard: {

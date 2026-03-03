@@ -13,3 +13,7 @@ File system watcher that detects external changes to `.agentreview/` data files 
 ## Why This Exists
 
 The CLI and extension share the same `.agentreview/` data directory. When the CLI modifies data (e.g., `arv apply`), the extension needs to pick up changes without a manual refresh.
+
+## Multi-Repo Note
+
+BridgeManager creates one FileWatcher per discovered repo. Additionally, `extension.ts` sets up a workspace-wide watcher for `**/.agentreview/session.json` creation to detect new repos initialized via the CLI.

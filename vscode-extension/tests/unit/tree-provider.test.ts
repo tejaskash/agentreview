@@ -7,6 +7,7 @@ import {
 } from "../../src/providers/tree-provider.js";
 import { CoreBridge } from "../../src/core-bridge.js";
 import { createTestRepo, cleanupTestRepo } from "../../../tests/helpers.js";
+import { mockBridgeManager } from "./bridge-manager-mock.js";
 
 describe("ArvTreeProvider", () => {
   let repoRoot: string;
@@ -24,7 +25,7 @@ describe("ArvTreeProvider", () => {
       headBranch: "feature-x",
       headCommit: headCommit!,
     });
-    provider = new ArvTreeProvider(bridge);
+    provider = new ArvTreeProvider(mockBridgeManager(repoRoot, bridge));
   });
 
   afterEach(() => {
@@ -114,7 +115,7 @@ describe("ArvTreeProvider", () => {
     const threadNode = threads[0] as ThreadNode;
     expect(threadNode.command).toBeDefined();
     expect(threadNode.command!.command).toBe("arv.openThread");
-    expect(threadNode.command!.arguments).toEqual(["t-1"]);
+    expect(threadNode.command!.arguments![0]).toBe("t-1");
   });
 
   it("resolved threads appear under resolved group", () => {
@@ -141,7 +142,7 @@ describe("ArvTreeProvider", () => {
 
   it("returns only status groups when no session", () => {
     const noBridge = new CoreBridge("/tmp/nonexistent-xyz");
-    const noProvider = new ArvTreeProvider(noBridge);
+    const noProvider = new ArvTreeProvider(mockBridgeManager("/tmp/nonexistent-xyz", noBridge));
     const children = noProvider.getChildren();
     // No session node, just 5 status groups
     expect(children).toHaveLength(5);

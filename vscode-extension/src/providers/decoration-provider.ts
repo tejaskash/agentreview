@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import path from "node:path";
-import type { CoreBridge } from "../core-bridge.js";
+import type { BridgeManager } from "../bridge-manager.js";
 import type { Thread, ThreadStatus } from "../../../src/types.js";
 import { eventBus } from "../event-bus.js";
 
@@ -21,7 +21,7 @@ export class DecorationProvider {
   private disposables: vscode.Disposable[] = [];
 
   constructor(
-    private bridge: CoreBridge,
+    private manager: BridgeManager,
     private extensionPath: string
   ) {
     // Create decoration types for each status
@@ -51,25 +51,24 @@ export class DecorationProvider {
     if (!editor) return;
 
     const filePath = editor.document.uri.fsPath;
-    const repoRoot = this.bridge.repoRoot;
+    const bridge = this.manager.getBridgeForFile(filePath);
 
-    // Get relative path
-    let relPath: string;
-    if (filePath.startsWith(repoRoot)) {
-      relPath = path.relative(repoRoot, filePath);
-    } else {
-      // Clear all decorations if file is outside repo
+    if (!bridge) {
+      // Clear all decorations if file is outside any known repo
       for (const decorationType of this.decorationTypes.values()) {
         editor.setDecorations(decorationType, []);
       }
       return;
     }
 
-    const threads = this.bridge.listThreads({ file: relPath });
+    const repoRoot = bridge.repoRoot;
+    const relPath = path.relative(repoRoot, filePath);
+    const threads = bridge.listThreads({ file: relPath });
 
-    // Group threads by status
+    // Group threads by status (skip resolved — they're done)
     const byStatus = new Map<ThreadStatus, Thread[]>();
     for (const thread of threads) {
+      if (thread.status === "resolved") continue;
       const list = byStatus.get(thread.status) ?? [];
       list.push(thread);
       byStatus.set(thread.status, list);
@@ -94,11 +93,11 @@ export class DecorationProvider {
       {
         provideHover: (document, position) => {
           const filePath = document.uri.fsPath;
-          const repoRoot = this.bridge.repoRoot;
-          if (!filePath.startsWith(repoRoot)) return undefined;
+          const bridge = this.manager.getBridgeForFile(filePath);
+          if (!bridge) return undefined;
 
-          const relPath = path.relative(repoRoot, filePath);
-          const threads = this.bridge.listThreads({ file: relPath });
+          const relPath = path.relative(bridge.repoRoot, filePath);
+          const threads = bridge.listThreads({ file: relPath });
           const line = position.line + 1; // Convert to 1-indexed
 
           const matchingThreads = threads.filter(

@@ -152,3 +152,38 @@ export function updateThreadStatus(
   saveThreads(repoRoot, data);
   return thread;
 }
+
+export function updateThreadSeverity(
+  repoRoot: string,
+  threadId: string,
+  severity: Severity
+): Thread {
+  const data = loadThreads(repoRoot);
+  const thread = data.threads.find((t) => t.id === threadId);
+  if (!thread) throw new Error(`Thread ${threadId} not found.`);
+  thread.severity = severity;
+  saveThreads(repoRoot, data);
+  return thread;
+}
+
+export function bulkResolveThreads(
+  repoRoot: string,
+  filter?: { status?: ThreadStatus; file?: string }
+): Thread[] {
+  const data = loadThreads(repoRoot);
+  const resolved: Thread[] = [];
+
+  for (const thread of data.threads) {
+    if (thread.status === "resolved") continue;
+    if (filter?.status && thread.status !== filter.status) continue;
+    if (filter?.file && thread.file !== filter.file) continue;
+    thread.status = "resolved";
+    resolved.push(thread);
+  }
+
+  if (resolved.length > 0) {
+    saveThreads(repoRoot, data);
+  }
+
+  return resolved;
+}

@@ -6,7 +6,7 @@ import { loadThreads } from "./threads.js";
 import { getDiff } from "./git.js";
 
 function generatePromptHint(session: Session): string {
-  return `The following is a code review for branch '${session.headBranch}' against '${session.baseBranch}'. Each thread is a conversation anchored to a specific code region. Read the full message history in each thread to understand context. Address all 'must-fix' and 'suggestion' threads. If you need clarification, use \`arv thread reply <id> -m '...' --role agent --status needs-human\` to ask. When done, produce a unified diff patch applicable with \`git apply\`, then use \`arv thread reply <id> -m '...' --role agent\` to explain what you changed in each thread.`;
+  return `The following is a code review for branch '${session.headBranch}' against '${session.baseBranch}'. Each thread is a conversation anchored to a specific code region. Read the full message history in each thread to understand context. Address all 'must-fix' threads and review 'comment' threads. If you need clarification, use \`arv thread reply <id> -m '...' --role agent --status needs-human\` to ask. When done, produce a unified diff patch applicable with \`git apply\`, then use \`arv thread reply <id> -m '...' --role agent\` to explain what you changed in each thread.`;
 }
 
 export async function generateExportBundle(

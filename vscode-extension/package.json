@@ -2,7 +2,7 @@
   "name": "arv-vscode",
   "displayName": "Agent Review (arv)",
   "description": "AI code review workflow — review threads anchored to code regions",
-  "version": "0.1.0",
+  "version": "0.4.2",
   "publisher": "arv",
   "engines": {
     "vscode": "^1.85.0"
@@ -54,6 +54,44 @@
       {
         "command": "arv.openThread",
         "title": "ARV: Open Thread"
+      },
+      {
+        "command": "arv.bulkResolve",
+        "title": "ARV: Bulk Resolve Threads"
+      },
+      {
+        "command": "arv.endSession",
+        "title": "ARV: End Review Session"
+      },
+      {
+        "command": "arv.bulkResolveGroup",
+        "title": "Resolve All",
+        "icon": "$(pass-filled)"
+      },
+      {
+        "command": "arv.replyComment",
+        "title": "Reply",
+        "icon": "$(reply)"
+      },
+      {
+        "command": "arv.resolveComment",
+        "title": "Resolve Thread",
+        "icon": "$(check)"
+      },
+      {
+        "command": "arv.reopenComment",
+        "title": "Reopen Thread",
+        "icon": "$(issues)"
+      },
+      {
+        "command": "arv.markMustFix",
+        "title": "Mark as Must-Fix",
+        "icon": "$(flame)"
+      },
+      {
+        "command": "arv.markComment",
+        "title": "Mark as Comment",
+        "icon": "$(comment)"
       }
     ],
     "menus": {
@@ -63,8 +101,62 @@
           "when": "editorHasSelection",
           "group": "arv@1"
         }
+      ],
+      "comments/commentThread/title": [
+        {
+          "command": "arv.resolveComment",
+          "group": "inline@1",
+          "when": "commentController == arv-threads && commentThreadIsEmpty == false"
+        },
+        {
+          "command": "arv.reopenComment",
+          "group": "inline@2",
+          "when": "commentController == arv-threads && commentThreadIsEmpty == false"
+        },
+        {
+          "command": "arv.markMustFix",
+          "group": "inline@3",
+          "when": "commentController == arv-threads && commentThread == comment"
+        },
+        {
+          "command": "arv.markComment",
+          "group": "inline@4",
+          "when": "commentController == arv-threads && commentThread == must-fix"
+        }
+      ],
+      "comments/commentThread/context": [
+        {
+          "command": "arv.replyComment",
+          "group": "inline",
+          "when": "commentController == arv-threads"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "arv.bulkResolveGroup",
+          "when": "view == arvThreads && viewItem == statusGroupResolvable",
+          "group": "inline"
+        }
       ]
-    }
+    },
+    "keybindings": [
+      {
+        "command": "arv.addThread",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "arv.bulkResolve",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r"
+      },
+      {
+        "command": "arv.showStatus",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s"
+      }
+    ]
   },
   "scripts": {
     "build": "node esbuild.config.mjs",

@@ -44,7 +44,7 @@ export async function addThread(bridge: CoreBridge): Promise<void> {
   if (!message) return;
 
   const severityPick = await vscode.window.showQuickPick(
-    ["comment", "suggestion", "must-fix"],
+    ["comment", "must-fix"],
     { placeHolder: "Severity" }
   );
   if (!severityPick) return;

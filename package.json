@@ -1,6 +1,6 @@
 {
   "name": "arv",
-  "version": "0.1.0",
+  "version": "0.4.2",
   "description": "Local AI code review CLI",
   "type": "module",
   "packageManager": "npm@11.6.2",

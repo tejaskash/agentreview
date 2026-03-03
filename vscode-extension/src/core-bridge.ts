@@ -13,6 +13,7 @@ import {
   sessionExists,
   createSession,
   loadSession,
+  endSession,
   addToGitignore,
 } from "../../src/core/session.js";
 
@@ -24,6 +25,8 @@ import {
   resolveThread,
   reopenThread,
   updateThreadStatus,
+  updateThreadSeverity,
+  bulkResolveThreads,
 } from "../../src/core/threads.js";
 
 import { createAnchor, reanchorThreads } from "../../src/core/anchors.js";
@@ -71,6 +74,14 @@ export class CoreBridge {
   }): Session | undefined {
     try {
       return createSession(this.repoRoot, opts);
+    } catch {
+      return undefined;
+    }
+  }
+
+  endSession(): Session | undefined {
+    try {
+      return endSession(this.repoRoot);
     } catch {
       return undefined;
     }
@@ -193,6 +204,22 @@ export class CoreBridge {
       return updateThreadStatus(this.repoRoot, threadId, status);
     } catch {
       return undefined;
+    }
+  }
+
+  updateThreadSeverity(threadId: string, severity: Severity): Thread | undefined {
+    try {
+      return updateThreadSeverity(this.repoRoot, threadId, severity);
+    } catch {
+      return undefined;
+    }
+  }
+
+  bulkResolveThreads(filter?: { status?: ThreadStatus; file?: string }): Thread[] {
+    try {
+      return bulkResolveThreads(this.repoRoot, filter);
+    } catch {
+      return [];
     }
   }
 

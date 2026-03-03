@@ -6,7 +6,7 @@ export interface Anchor {
   contextAfter: string;
 }
 
-export type Severity = "comment" | "suggestion" | "must-fix";
+export type Severity = "comment" | "must-fix";
 
 export type ThreadStatus =
   | "open"

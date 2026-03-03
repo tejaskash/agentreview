@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import type { CoreBridge } from "../core-bridge.js";
+import path from "node:path";
+import type { BridgeManager } from "../bridge-manager.js";
 import type { Thread, ThreadStatus, Session } from "../../../src/types.js";
 import { eventBus } from "../event-bus.js";
 
@@ -27,7 +28,23 @@ const STATUS_ICONS: Record<ThreadStatus, string> = {
   orphaned: "warning",
 };
 
-type TreeNode = SessionNode | StatusGroupNode | ThreadNode;
+type TreeNode = RepoNode | SessionNode | StatusGroupNode | ThreadNode;
+
+export class RepoNode extends vscode.TreeItem {
+  constructor(
+    public readonly repoRoot: string,
+    public readonly session: Session | undefined,
+    public readonly threads: Thread[]
+  ) {
+    super(
+      path.basename(repoRoot),
+      vscode.TreeItemCollapsibleState.Expanded
+    );
+    this.description = session ? session.headBranch : "no session";
+    this.iconPath = new vscode.ThemeIcon("repo");
+    this.contextValue = "repo";
+  }
+}
 
 export class SessionNode extends vscode.TreeItem {
   constructor(public readonly session: Session) {
@@ -44,7 +61,8 @@ export class SessionNode extends vscode.TreeItem {
 export class StatusGroupNode extends vscode.TreeItem {
   constructor(
     public readonly status: ThreadStatus,
-    public readonly count: number
+    public readonly count: number,
+    public readonly repoRoot?: string
   ) {
     super(
       `${STATUS_LABELS[status]} (${count})`,
@@ -53,12 +71,12 @@ export class StatusGroupNode extends vscode.TreeItem {
         : vscode.TreeItemCollapsibleState.Collapsed
     );
     this.iconPath = new vscode.ThemeIcon(STATUS_ICONS[status]);
-    this.contextValue = "statusGroup";
+    this.contextValue = status === "resolved" ? "statusGroup" : "statusGroupResolvable";
   }
 }
 
 export class ThreadNode extends vscode.TreeItem {
-  constructor(public readonly thread: Thread) {
+  constructor(public readonly thread: Thread, repoRoot?: string) {
     const lineRange =
       thread.anchor.startLine === thread.anchor.endLine
         ? `${thread.anchor.startLine}`
@@ -74,27 +92,43 @@ export class ThreadNode extends vscode.TreeItem {
     this.command = {
       command: "arv.openThread",
       title: "Open Thread",
-      arguments: [thread.id],
+      arguments: [thread.id, repoRoot],
     };
   }
+}
+
+interface RepoData {
+  repoRoot: string;
+  session: Session | undefined;
+  threads: Thread[];
 }
 
 export class ArvTreeProvider implements vscode.TreeDataProvider<TreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<TreeNode | undefined | void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-  private threads: Thread[] = [];
-  private session: Session | undefined;
+  private repos: RepoData[] = [];
+  private multiRepo = false;
 
-  constructor(private bridge: CoreBridge) {
+  constructor(private manager: BridgeManager) {
     this.refresh();
     eventBus.onThreadsChanged(() => this.refresh());
     eventBus.onSessionChanged(() => this.refresh());
   }
 
   refresh(): void {
-    this.session = this.bridge.loadSession();
-    this.threads = this.bridge.listThreads();
+    const bridges = this.manager.getAllBridges();
+    this.repos = [];
+
+    for (const [repoRoot, bridge] of bridges) {
+      this.repos.push({
+        repoRoot,
+        session: bridge.loadSession(),
+        threads: bridge.listThreads(),
+      });
+    }
+
+    this.multiRepo = this.repos.length > 1;
     this._onDidChangeTreeData.fire();
   }
 
@@ -104,25 +138,47 @@ export class ArvTreeProvider implements vscode.TreeDataProvider<TreeNode> {
 
   getChildren(element?: TreeNode): TreeNode[] {
     if (!element) {
-      // Root level
-      const nodes: TreeNode[] = [];
-      if (this.session) {
-        nodes.push(new SessionNode(this.session));
+      if (this.multiRepo) {
+        // Root shows RepoNodes
+        return this.repos.map(
+          (r) => new RepoNode(r.repoRoot, r.session, r.threads)
+        );
       }
-      for (const status of STATUS_ORDER) {
-        const count = this.threads.filter((t) => t.status === status).length;
-        nodes.push(new StatusGroupNode(status, count));
-      }
-      return nodes;
+      // Single repo: show flat structure (same as before)
+      const repo = this.repos[0];
+      if (!repo) return [];
+      return this.buildRepoChildren(repo);
+    }
+
+    if (element instanceof RepoNode) {
+      const repo = this.repos.find((r) => r.repoRoot === element.repoRoot);
+      if (!repo) return [];
+      return this.buildRepoChildren(repo);
     }
 
     if (element instanceof StatusGroupNode) {
-      return this.threads
+      const repo = element.repoRoot
+        ? this.repos.find((r) => r.repoRoot === element.repoRoot)
+        : this.repos[0];
+      if (!repo) return [];
+      return repo.threads
         .filter((t) => t.status === element.status)
-        .map((t) => new ThreadNode(t));
+        .map((t) => new ThreadNode(t, repo.repoRoot));
     }
 
     return [];
+  }
+
+  private buildRepoChildren(repo: RepoData): TreeNode[] {
+    const nodes: TreeNode[] = [];
+    if (repo.session) {
+      nodes.push(new SessionNode(repo.session));
+    }
+    for (const status of STATUS_ORDER) {
+      const count = repo.threads.filter((t) => t.status === status).length;
+      nodes.push(new StatusGroupNode(status, count, repo.repoRoot));
+    }
+    return nodes;
   }
 
   dispose(): void {
