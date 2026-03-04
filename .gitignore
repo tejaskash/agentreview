@@ -5,3 +5,4 @@ dist/
 *.vsix
 .vscode
 .agentreview
+.claude

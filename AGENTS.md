@@ -10,37 +10,56 @@ This is an npm workspaces monorepo managed by Turborepo.
 
 ```
 .
-├── src/                    # CLI source code
-├── tests/                  # CLI tests
-├── vscode-extension/       # VS Code extension (separate package)
-│   ├── src/                # Extension source
-│   └── tests/              # Extension tests
-├── docs/skills/arv/        # Claude Code /arv skill
-├── turbo.json              # Turborepo task config
-└── package.json            # Root package (CLI + workspaces)
+├── packages/
+│   ├── core/               # Core library ("agentreview" on NPM)
+│   │   └── src/             # types, session, threads, anchors, git, export
+│   ├── cli/                # CLI tool ("arv" command)
+│   │   ├── src/             # CLI entry point + command handlers
+│   │   └── tests/           # CLI tests (unit, integration, e2e)
+│   └── vscode/             # VS Code extension ("arv-vscode")
+│       ├── src/             # Extension source — imports from "agentreview"
+│       └── tests/           # Extension tests
+├── docs/skills/arv/         # Claude Code /arv skill
+├── turbo.json               # Turborepo task config
+└── package.json             # Workspace root (private)
 ```
 
-**Two packages:**
-- **Root (`arv`)** — CLI tool. TypeScript + Commander + simple-git.
-- **`vscode-extension` (`arv-vscode`)** — VS Code extension. Bundles core logic from `../../src/` via esbuild — **does not require the CLI to be installed**.
+**Three packages:**
+- **`packages/core` (`agentreview`)** — Core library. Types, session, threads, anchors, git, export logic. Published to NPM.
+- **`packages/cli` (`arv`)** — CLI tool. TypeScript + Commander. Depends on `agentreview`.
+- **`packages/vscode` (`arv-vscode`)** — VS Code extension. Depends on `agentreview`, bundles it via esbuild.
 
 **Turbo commands:**
-- `npm run turbo:build` — build both packages
-- `npm run turbo:test` — test both packages
+- `npm run build` — build all packages (core first, then CLI + extension)
+- `npm test` — test all packages
 - `npx turbo build/test` — equivalent direct invocations
 
 ## CLI Architecture
 
 ```
-src/
-├── cli.ts              # CLI entry point — defines all commands via Commander
-├── types.ts            # Shared TypeScript interfaces (Anchor, Thread, Message, Session, etc.)
-├── commands/           # Command handlers — thin wrappers that call into core/
-└── core/               # Business logic — session, threads, anchors, git, export
-tests/                  # Vitest test suite — unit, integration, and e2e tests
+packages/cli/
+├── src/
+│   ├── cli.ts              # CLI entry point — defines all commands via Commander
+│   └── commands/           # Command handlers — thin wrappers importing from "agentreview"
+└── tests/                  # Vitest test suite — unit, integration, and e2e tests
 ```
 
-**Layered design:** CLI → Commands → Core. Commands are thin; all logic lives in `core/`.
+**Layered design:** CLI → Commands → Core (`agentreview` package). Commands are thin; all logic lives in the core package.
+
+## Core Package (`packages/core/`)
+
+```
+packages/core/src/
+├── index.ts            # Barrel re-export of all public API
+├── types.ts            # Shared TypeScript interfaces (Anchor, Thread, Message, Session, etc.)
+├── session.ts          # Session CRUD, .agentreview directory management
+├── threads.ts          # Thread CRUD, status transitions, bulk operations
+├── anchors.ts          # Anchor creation, LCS fuzzy matching, re-anchoring
+├── git.ts              # simple-git wrappers (branch, diff, patch)
+└── export.ts           # Export bundle generation, run records
+```
+
+**Subpath exports:** Import specific modules via `agentreview/session`, `agentreview/threads`, etc., or use `agentreview` for types and the full API.
 
 ## Tech Stack
 
@@ -101,10 +120,10 @@ All state lives in `.agentreview/` at the repo root (auto-added to `.gitignore`)
 
 ## VS Code Extension
 
-The extension in `vscode-extension/` provides a full GUI for ARV inside VS Code. See `vscode-extension/AGENTS.md` for its architecture and file details. Key points:
+The extension in `packages/vscode/` provides a full GUI for ARV inside VS Code. See `packages/vscode/AGENTS.md` for its architecture and file details. Key points:
 
 - **BridgeManager** discovers and manages multiple repos in a workspace. Each repo gets its own `CoreBridge` and `FileWatcher`.
-- **CoreBridge** wraps all CLI core logic — the extension bundles it via esbuild (no CLI install needed).
+- **CoreBridge** wraps `agentreview` core logic — the extension bundles it via esbuild (no CLI install needed).
 - **Multi-repo support** — opening a parent folder with multiple git repos auto-discovers all ARV sessions.
 - **EventBus** (singleton) coordinates UI updates across providers.
 - Built with esbuild (CJS bundle), tested with Vitest + a vscode mock.
@@ -112,14 +131,14 @@ The extension in `vscode-extension/` provides a full GUI for ARV inside VS Code.
 ## Building and Testing
 
 ```sh
-npm install
-npm run build        # TypeScript → dist/ (CLI only)
-npm test             # Run CLI test suite
-npx tsx src/cli.ts   # Run CLI in development
-
 # Monorepo-wide via turbo
-npm run turbo:build  # Build CLI + extension
-npm run turbo:test   # Test CLI + extension
+npm run build    # Build all packages (core → CLI + extension)
+npm test         # Test all packages
+
+# Individual packages
+cd packages/cli && npm run dev   # Run CLI in development
+cd packages/cli && npm test      # Run CLI tests only
+cd packages/vscode && npm test   # Run extension tests only
 ```
 
 ## Conventions

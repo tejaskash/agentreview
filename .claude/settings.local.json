@@ -1,8 +1,17 @@
 {
+  "env": {
+    "CLAUDE_CODE_USE_BEDROCK": "0"
+  },
+  "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
       "Bash(wc:*)",
-      "Bash(git -C /Users/tejas/Desktop/agentreview log --oneline)"
+      "Bash(git -C /Users/tejas/Desktop/agentreview log --oneline)",
+      "Bash(npm run:*)",
+      "Bash(npx:*)",
+      "WebSearch",
+      "Bash(npm install:*)"
     ]
-  }
+  },
+  "model": "opus"
 }

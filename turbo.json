@@ -2,16 +2,11 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "build": {
-      "outputs": ["dist/**"]
-    },
-    "//#build": {
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "test": {
       "dependsOn": ["build"]
-    },
-    "//#test": {
-      "dependsOn": ["//#build"]
     },
     "test:watch": {
       "persistent": true,
