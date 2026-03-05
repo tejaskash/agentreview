@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import path from "node:path";
 import type { CoreBridge } from "../core-bridge.js";
-import type { Severity } from "agentreview";
+import type { Severity } from "agntrev";
 import { eventBus } from "../event-bus.js";
 
 export async function addThread(bridge: CoreBridge): Promise<void> {

@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import path from "node:path";
 import type { BridgeManager } from "../bridge-manager.js";
 import type { CoreBridge } from "../core-bridge.js";
-import type { Severity, Thread } from "agentreview";
+import type { Severity, Thread } from "agntrev";
 import { eventBus } from "../event-bus.js";
 
 /**

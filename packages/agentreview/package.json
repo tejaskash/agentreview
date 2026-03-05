@@ -1,5 +1,5 @@
 {
-  "name": "agentreview",
+  "name": "agntrev",
   "version": "0.1.0",
   "description": "AI code review CLI and library — review sessions anchored to code regions",
   "type": "module",
@@ -7,7 +7,7 @@
   "author": "Tejas Kashinath ",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tejaskash/agentreview.git",
+    "url": "git+https://github.com/tejaskash/agentreview.git",
     "directory": "packages/agentreview"
   },
   "keywords": [

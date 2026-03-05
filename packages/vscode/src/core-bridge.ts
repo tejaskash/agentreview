@@ -7,7 +7,7 @@ import type {
   Thread,
   ThreadStatus,
   MessageRole,
-} from "agentreview";
+} from "agntrev";
 
 import {
   sessionExists,
@@ -15,7 +15,7 @@ import {
   loadSession,
   endSession,
   addToGitignore,
-} from "agentreview/session";
+} from "agntrev/session";
 
 import {
   listThreads,
@@ -27,9 +27,9 @@ import {
   updateThreadStatus,
   updateThreadSeverity,
   bulkResolveThreads,
-} from "agentreview/threads";
+} from "agntrev/threads";
 
-import { createAnchor, reanchorThreads } from "agentreview/anchors";
+import { createAnchor, reanchorThreads } from "agntrev/anchors";
 
 import {
   isGitRepo,
@@ -38,12 +38,12 @@ import {
   branchExists,
   checkPatch,
   applyPatch,
-} from "agentreview/git";
+} from "agntrev/git";
 
 import {
   generateExportBundle,
   saveRunRecord,
-} from "agentreview/export";
+} from "agntrev/export";
 
 export class CoreBridge {
   constructor(public repoRoot: string) {}

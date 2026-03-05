@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import type { CoreBridge } from "../core-bridge.js";
-import type { ThreadStatus } from "agentreview";
+import type { ThreadStatus } from "agntrev";
 
 export async function showStatus(bridge: CoreBridge): Promise<void> {
   const session = bridge.loadSession();

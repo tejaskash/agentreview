@@ -177,7 +177,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "agentreview": "*"
+    "agntrev": "*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

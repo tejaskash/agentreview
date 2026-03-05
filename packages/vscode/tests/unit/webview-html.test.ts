@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildThreadPanelHtml } from "../../src/util/webview-html.js";
-import type { Thread } from "agentreview";
+import type { Thread } from "agntrev";
 
 function makeThread(overrides: Partial<Thread> = {}): Thread {
   return {

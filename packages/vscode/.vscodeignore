@@ -1,18 +1,8 @@
-# Parent monorepo files (imported via ../../src/ — already bundled by esbuild)
-../**
-
-# Source & test files (bundled into dist/extension.js)
-src/**
-tests/**
-
-# Dev tooling
-node_modules/**
-esbuild.config.mjs
-vitest.config.ts
-tsconfig.json
-
-# Sourcemaps (reference parent-directory paths, not needed at runtime)
-**/*.map
-
-# Docs
-AGENTS.md
+**
+!dist/extension.js
+!package.json
+!README.md
+!LICENSE
+!media/*.png
+!media/icons/**
+!media/webview/**

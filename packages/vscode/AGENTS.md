@@ -10,7 +10,7 @@ VS Code extension for ARV. Provides a graphical interface for managing review se
 src/
 ├── extension.ts          # Entry point — activate/deactivate lifecycle
 ├── bridge-manager.ts     # Multi-repo bridge discovery and routing
-├── core-bridge.ts        # Adapter wrapping core modules from "agentreview"
+├── core-bridge.ts        # Adapter wrapping core modules from "agntrev"
 ├── event-bus.ts          # Typed singleton EventEmitter (threads-changed, session-changed)
 ├── commands/             # Command handlers registered in the command palette
 ├── providers/            # Tree view, gutter decorations, status bar, inline comments

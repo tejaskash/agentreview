@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import path from "node:path";
 import type { BridgeManager } from "../bridge-manager.js";
-import type { Thread, ThreadStatus } from "agentreview";
+import type { Thread, ThreadStatus } from "agntrev";
 import { eventBus } from "../event-bus.js";
 
 const DECORATION_CONFIGS: Record<

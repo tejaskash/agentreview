@@ -1,4 +1,4 @@
-import type { Thread } from "agentreview";
+import type { Thread } from "agntrev";
 
 export function buildThreadPanelHtml(
   thread: Thread,

@@ -11,13 +11,13 @@ This is an npm workspaces monorepo managed by Turborepo.
 ```
 .
 ├── packages/
-│   ├── agentreview/        # Core library + CLI ("agentreview" on NPM)
+│   ├── agentreview/        # Core library + CLI ("agntrev" on NPM)
 │   │   ├── src/
 │   │   │   ├── core/       # types, session, threads, anchors, git, export
 │   │   │   └── cli/        # CLI entry point + command handlers
 │   │   └── tests/          # Vitest test suite — unit, integration, and e2e tests
 │   └── vscode/             # VS Code extension ("arv-vscode")
-│       ├── src/             # Extension source — imports from "agentreview"
+│       ├── src/             # Extension source — imports from "agntrev"
 │       └── tests/           # Extension tests
 ├── docs/skills/arv/         # Claude Code /arv skill
 ├── turbo.json               # Turborepo task config
