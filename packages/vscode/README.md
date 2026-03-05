@@ -4,23 +4,23 @@ Code review for AI-generated changes. Anchor review threads to specific lines, t
 
 **Initialize a review session** from the command palette (`Cmd+Shift+P`).
 
-![Step 1: Initialize review session](media/1-cmdshiftp-init-review-sesh.png)
+![Step 1: Initialize review session](https://raw.githubusercontent.com/tejaskash/agentreview/main/packages/vscode/media/1-cmdshiftp-init-review-sesh.png)
 
 **Select code and add review comments** — threads anchor to the exact lines you selected.
 
-![Step 2: Review code and add comments](media/2-review-code-add-cmmnts.png)
+![Step 2: Review code and add comments](https://raw.githubusercontent.com/tejaskash/agentreview/main/packages/vscode/media/2-review-code-add-cmmnts.png)
 
 **Escalate issues to must-fix** by clicking the severity badge in the comment.
 
-![Step 3: Mark comments as must-fix](media/3-mark-cmnt-must-fix.png)
+![Step 3: Mark comments as must-fix](https://raw.githubusercontent.com/tejaskash/agentreview/main/packages/vscode/media/3-mark-cmnt-must-fix.png)
 
 **Track all open threads** in the Activity Bar panel, grouped by status.
 
-![Step 4: Review open threads](media/4-review-open-threads.png)
+![Step 4: Review open threads](https://raw.githubusercontent.com/tejaskash/agentreview/main/packages/vscode/media/4-review-open-threads.png)
 
 **Let Claude fix everything** — type `/arv` in Claude Code and it addresses each thread automatically.
 
-![Step 5: Ask Claude to fix issues](media/5-ask-claude-review.png)
+![Step 5: Ask Claude to fix issues](https://raw.githubusercontent.com/tejaskash/agentreview/main/packages/vscode/media/5-ask-claude-review.png)
 
 ## Quick Start
 

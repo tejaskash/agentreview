@@ -2,7 +2,7 @@
   "name": "agentreview-vscode",
   "displayName": "AgentReview (ARV)",
   "description": "AI code review workflow — review threads anchored to code regions",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "agentreview",
   "engines": {
     "vscode": "^1.85.0"
