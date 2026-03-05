@@ -3,8 +3,7 @@
   "private": true,
   "packageManager": "npm@11.6.2",
   "workspaces": [
-    "packages/core",
-    "packages/cli",
+    "packages/agentreview",
     "packages/vscode"
   ],
   "scripts": {

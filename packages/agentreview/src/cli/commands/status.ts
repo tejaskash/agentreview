@@ -1,8 +1,8 @@
 import chalk from "chalk";
-import { loadSession } from "agentreview/session";
-import { listThreads } from "agentreview/threads";
-import { loadRunRecords } from "agentreview/export";
-import type { ThreadStatus } from "agentreview";
+import { loadSession } from "../../core/session.js";
+import { listThreads } from "../../core/threads.js";
+import { loadRunRecords } from "../../core/export.js";
+import type { ThreadStatus } from "../../core/types.js";
 
 export function statusCommand(repoRoot: string): void {
   const session = loadSession(repoRoot);

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { DecorationProvider } from "../../src/providers/decoration-provider.js";
 import { CoreBridge } from "../../src/core-bridge.js";
-import { createTestRepo, cleanupTestRepo } from "../../../cli/tests/helpers.js";
+import { createTestRepo, cleanupTestRepo } from "../helpers.js";
 import { mockBridgeManager } from "./bridge-manager-mock.js";
 import * as vscode from "vscode";
 import path from "node:path";

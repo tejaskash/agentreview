@@ -1,6 +1,6 @@
 import chalk from "chalk";
-import { createSession, sessionExists, loadSession, addToGitignore } from "agentreview/session";
-import { isGitRepo, getCurrentBranch, getCommitHash, branchExists } from "agentreview/git";
+import { createSession, sessionExists, loadSession, addToGitignore } from "../../core/session.js";
+import { isGitRepo, getCurrentBranch, getCommitHash, branchExists } from "../../core/git.js";
 
 export async function initCommand(
   repoRoot: string,

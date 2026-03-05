@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { StatusBarProvider } from "../../src/providers/status-bar.js";
 import { CoreBridge } from "../../src/core-bridge.js";
-import { createTestRepo, cleanupTestRepo } from "../../../cli/tests/helpers.js";
+import { createTestRepo, cleanupTestRepo } from "../helpers.js";
 import { mockBridgeManager } from "./bridge-manager-mock.js";
 
 describe("StatusBarProvider", () => {

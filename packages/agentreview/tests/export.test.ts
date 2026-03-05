@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { generateExportBundle, saveRunRecord, loadRunRecords } from "agentreview/export";
-import { createSession } from "agentreview/session";
-import { addThread } from "agentreview/threads";
-import { createAnchor } from "agentreview/anchors";
+import { generateExportBundle, saveRunRecord, loadRunRecords } from "../src/core/export.js";
+import { createSession } from "../src/core/session.js";
+import { addThread } from "../src/core/threads.js";
+import { createAnchor } from "../src/core/anchors.js";
 import { createTestRepo, cleanupTestRepo } from "./helpers.js";
 
 describe("export", () => {
@@ -57,7 +57,7 @@ describe("export", () => {
     });
 
     // Resolve thread t-1
-    const { resolveThread } = await import("agentreview/threads");
+    const { resolveThread } = await import("../src/core/threads.js");
     resolveThread(repoRoot, "t-1");
 
     const bundle = await generateExportBundle(repoRoot);

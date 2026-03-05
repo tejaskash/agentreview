@@ -7,7 +7,7 @@ import {
   sessionExists,
   getReviewDir,
   addToGitignore,
-} from "agentreview/session";
+} from "../src/core/session.js";
 import { createTestRepo, cleanupTestRepo } from "./helpers.js";
 
 describe("session", () => {

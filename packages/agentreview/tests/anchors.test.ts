@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { createAnchor, findAnchorInContent, reanchorThreads } from "agentreview/anchors";
-import { createSession } from "agentreview/session";
-import { addThread } from "agentreview/threads";
+import { createAnchor, findAnchorInContent, reanchorThreads } from "../src/core/anchors.js";
+import { createSession } from "../src/core/session.js";
+import { addThread } from "../src/core/threads.js";
 import { createTestRepo, cleanupTestRepo } from "./helpers.js";
 
 describe("anchors", () => {

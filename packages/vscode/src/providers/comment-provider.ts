@@ -5,13 +5,39 @@ import type { CoreBridge } from "../core-bridge.js";
 import type { Severity, Thread } from "agentreview";
 import { eventBus } from "../event-bus.js";
 
+/**
+ * Bridges ARV review threads to VS Code's native Comment API.
+ *
+ * VS Code's Comment API works with two concepts: a CommentController (which owns
+ * the gutter UI and defines where users can add comments) and CommentThreads
+ * (individual conversations pinned to a file range). This class keeps a two-way
+ * mapping between ARV's domain threads and the VS Code CommentThread objects so
+ * it can sync state in both directions — ARV → UI on data changes, and UI → ARV
+ * when the user replies, resolves, or toggles severity inline.
+ */
 export class ArvCommentProvider {
+  /** The VS Code comment controller that owns the gutter "add comment" UI. */
   private controller: vscode.CommentController;
-  /** Keyed by `${repoRoot}::${threadId}` */
+
+  /**
+   * Forward map: ARV thread → VS Code CommentThread.
+   * Composite key is `${repoRoot}::${threadId}` because the extension supports
+   * multiple repos in one workspace, so thread IDs alone aren't unique.
+   */
   private commentThreads: Map<string, vscode.CommentThread> = new Map();
-  /** Reverse map: VS Code CommentThread → { repoRoot, threadId } */
+
+  /**
+   * Reverse map: VS Code CommentThread → ARV identity.
+   * Needed because VS Code's reply/resolve callbacks give us a CommentThread
+   * object and we need to look up which repo + ARV thread ID it belongs to.
+   */
   private threadData: Map<vscode.CommentThread, { repoRoot: string; threadId: string }> = new Map();
+
+  /** Subscriptions to dispose when this provider is torn down. */
   private disposables: vscode.Disposable[] = [];
+
+  /** Tracks whether any repo had an active session last time we checked,
+   *  so we can detect session create/end transitions and recreate the controller. */
   private hadSession = false;
 
   constructor(private manager: BridgeManager) {

@@ -2,14 +2,12 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { createTestRepo, cleanupTestRepo } from "./helpers.js";
-
-import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createTestRepo, cleanupTestRepo } from "./helpers.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..");
-const CLI = `npx tsx ${path.join(PROJECT_ROOT, "src/cli.ts")}`;
+const CLI = `npx tsx ${path.join(PROJECT_ROOT, "src/cli/cli.ts")}`;
 
 function run(cmd: string, cwd: string): string {
   try {

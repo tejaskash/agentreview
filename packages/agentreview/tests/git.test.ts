@@ -5,7 +5,7 @@ import {
   getDiff,
   getDiffStat,
   branchExists,
-} from "agentreview/git";
+} from "../src/core/git.js";
 import { createTestRepo, cleanupTestRepo } from "./helpers.js";
 
 describe("git", () => {

@@ -1,4 +1,4 @@
-# ARV — Agent Review
+# Agent Review
 
 A code review tool for the age of AI-generated code. VS Code extension + CLI.
 
@@ -6,11 +6,31 @@ A code review tool for the age of AI-generated code. VS Code extension + CLI.
 
 AI agents generate a lot of code — fast. But the review process hasn't kept up. GitHub PR reviews, AI-assisted or not, tend to skim the surface: style nits, obvious bugs, rubber stamps. The hard problems — logic gaps, security holes, architectural drift — slip through because there's no structured way to anchor feedback to specific code, track whether it was actually fixed, and close the loop.
 
-You should be reviewing your own code. ARV makes that practical.
+You should be reviewing your own code. Agent Review makes that practical.
+
+**Initialize a review session** from the command palette (`Cmd+Shift+P`).
+
+![Step 1: Initialize review session](packages/vscode/media/1-cmdshiftp-init-review-sesh.png)
+
+**Select code and add review comments** — threads anchor to the exact lines you selected.
+
+![Step 2: Review code and add comments](packages/vscode/media/2-review-code-add-cmmnts.png)
+
+**Escalate issues to must-fix** by clicking the severity badge in the comment.
+
+![Step 3: Mark comments as must-fix](packages/vscode/media/3-mark-cmnt-must-fix.png)
+
+**Track all open threads** in the Activity Bar panel, grouped by status.
+
+![Step 4: Review open threads](packages/vscode/media/4-review-open-threads.png)
+
+**Let Claude fix everything** — type `/arv` in Claude Code and it addresses each thread automatically.
+
+![Step 5: Ask Claude to fix issues](packages/vscode/media/5-ask-claude-review.png)
 
 ## The Solution
 
-ARV gives you a structured, git-aware review workflow. Open a review session, anchor comments directly to lines of code, mark issues as `comment` or `must-fix`, and track resolution — all inside VS Code or from the command line. When you're working with an AI agent, export the review context as a single JSON bundle or let the agent read the review files directly.
+Agent Review gives you a structured, git-aware review workflow. Open a review session, anchor comments directly to lines of code, mark issues as `comment` or `must-fix`, and track resolution — all inside VS Code or from the command line. When you're working with an AI agent, export the review context as a single JSON bundle or let the agent read the review files directly.
 
 ## Quick Start (VS Code)
 
@@ -20,10 +40,10 @@ ARV gives you a structured, git-aware review workflow. Open a review session, an
 git clone <this repo>
 cd agentreview
 npm install
-npm run turbo:build
+npm run build
 
 # Install the VS Code extension
-cd vscode-extension
+cd packages/vscode
 vsce package
 code --install-extension arv-vscode-*.vsix
 ```
@@ -32,7 +52,7 @@ If you don't have `vsce`: `npm install -g @vscode/vsce`
 
 ### 2. Start a review
 
-Open your project in VS Code. Run **ARV: Initialize Review Session** from the command palette (`Cmd+Shift+P`). ARV auto-detects your base branch.
+Open your project in VS Code. Run **ARV: Initialize Review Session** from the command palette (`Cmd+Shift+P`). Agent Review auto-detects your base branch.
 
 ### 3. Add review comments
 
@@ -55,7 +75,6 @@ For other agents, export a bundle: **ARV: Export for Agent** from the command pa
 ```sh
 npm install
 npm run build
-npm link   # makes `arv` available globally
 
 # Start a review session on your feature branch
 arv init
@@ -110,7 +129,7 @@ arv apply agent-fix.diff
 
 ### Anchors
 
-When you add a thread, ARV captures the exact text at the specified lines plus 3 lines of surrounding context. After a patch is applied, ARV relocates each anchor using exact text matching first, then falls back to fuzzy matching (LCS algorithm, 60% similarity threshold). If an anchor can't be found at all, the thread is marked `orphaned`.
+When you add a thread, Agent Review captures the exact text at the specified lines plus 3 lines of surrounding context. After a patch is applied, it relocates each anchor using exact text matching first, then falls back to fuzzy matching (LCS algorithm, 60% similarity threshold). If an anchor can't be found at all, the thread is marked `orphaned`.
 
 ### Thread Status
 
@@ -139,7 +158,7 @@ All review state is stored locally in `.agentreview/` at the repo root (automati
 
 ## VS Code Extension
 
-The extension provides the full ARV experience inside VS Code:
+The extension provides the full Agent Review experience inside VS Code:
 
 - **Inline comments** — anchor review threads to code selections via the Comment API
 - **Severity toggle** — clickable badge in the comment body to switch between `comment` and `must-fix`
@@ -148,15 +167,19 @@ The extension provides the full ARV experience inside VS Code:
 - **Command palette** — init, add thread, export, apply patch, status, end session
 - **Right-click menu** — add a thread from any selection
 - **File watcher** — auto-refreshes when `.agentreview/` data changes on disk
-- **Multi-repo** — open a parent folder with multiple git repos and ARV discovers all sessions
+- **Multi-repo** — open a parent folder with multiple git repos and Agent Review discovers all sessions
 
 The extension bundles the core logic via esbuild — **the CLI does not need to be installed**.
 
 ## Claude Code Integration
 
-ARV ships with a `/arv` skill for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that lets an agent read all review threads and fix them automatically — no export step needed.
+Agent Review ships with a `/arv` skill for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that lets an agent read all review threads and fix them automatically — no export step needed.
 
 ### Install the `/arv` skill
+
+If you use the VS Code extension, the skill is installed automatically on activation.
+
+Otherwise, install manually:
 
 ```sh
 mkdir -p ~/.claude/skills/arv
@@ -186,11 +209,14 @@ Claude will read all threads, fix issues in priority order (must-fix first), rep
 ## Development
 
 ```sh
-npm install            # Install all dependencies (both packages)
-npm run turbo:build    # Build CLI + extension
-npm run turbo:test     # Test CLI + extension
-npm run build          # CLI only
-npm test               # CLI tests only
+npm install          # Install all dependencies
+npm run build        # Build all packages (agentreview → extension)
+npm test             # Test all packages
+
+# Individual package
+cd packages/agentreview && npm run dev    # Run CLI in development
+cd packages/agentreview && npm test       # Run tests only
+cd packages/vscode && npm test            # Run extension tests only
 ```
 
 ## License

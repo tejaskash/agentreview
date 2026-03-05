@@ -1,7 +1,7 @@
 import chalk from "chalk";
-import { endSession } from "agentreview/session";
-import { listThreads } from "agentreview/threads";
-import type { ThreadStatus } from "agentreview";
+import { endSession } from "../../core/session.js";
+import { listThreads } from "../../core/threads.js";
+import type { ThreadStatus } from "../../core/types.js";
 
 export function endCommand(repoRoot: string): void {
   const threads = listThreads(repoRoot);

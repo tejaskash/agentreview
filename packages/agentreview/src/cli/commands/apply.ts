@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import chalk from "chalk";
-import { checkPatch, applyPatch } from "agentreview/git";
-import { reanchorThreads } from "agentreview/anchors";
-import { loadRunRecords, updateRunRecord } from "agentreview/export";
-import { loadSession } from "agentreview/session";
+import { checkPatch, applyPatch } from "../../core/git.js";
+import { reanchorThreads } from "../../core/anchors.js";
+import { loadRunRecords, updateRunRecord } from "../../core/export.js";
+import { loadSession } from "../../core/session.js";
 
 export async function applyCommand(
   repoRoot: string,

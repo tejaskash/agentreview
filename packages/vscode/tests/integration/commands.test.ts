@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import * as vscode from "vscode";
 import path from "node:path";
 import { CoreBridge } from "../../src/core-bridge.js";
-import { createTestRepo, cleanupTestRepo } from "../../../cli/tests/helpers.js";
+import { createTestRepo, cleanupTestRepo } from "../helpers.js";
 import { initSession } from "../../src/commands/init-session.js";
 import { addThread } from "../../src/commands/add-thread.js";
 import { showStatus } from "../../src/commands/show-status.js";

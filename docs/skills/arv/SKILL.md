@@ -45,12 +45,22 @@ If the user provided arguments (e.g., "only must-fix", "skip comments"), respect
 
 ## 4. Reply to each thread
 
-After fixing, reply to each addressed thread using the CLI:
+After fixing, reply to each addressed thread. Try the CLI first:
 ```
 arv thread reply <thread-id> -m "<explanation of what was changed>" --role agent
 ```
 
-If the `arv` CLI is unavailable, note the replies you would make.
+If the `arv` CLI is not installed, edit `.agentreview/threads.json` directly instead. For each thread, append a message to its `messages` array:
+
+```json
+{
+  "role": "agent",
+  "body": "<explanation of what was changed>",
+  "createdAt": "<ISO 8601 timestamp>"
+}
+```
+
+If you made a code change that addresses the thread, also set the thread's `status` to `"addressed"`.
 
 ## 5. Summarize
 

@@ -6,9 +6,9 @@ import {
   getThread,
   resolveThread,
   reopenThread,
-} from "agentreview/threads";
-import { createSession } from "agentreview/session";
-import { createAnchor } from "agentreview/anchors";
+} from "../src/core/threads.js";
+import { createSession } from "../src/core/session.js";
+import { createAnchor } from "../src/core/anchors.js";
 import { createTestRepo, cleanupTestRepo } from "./helpers.js";
 
 describe("threads", () => {

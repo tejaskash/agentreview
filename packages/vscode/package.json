@@ -1,14 +1,22 @@
 {
-  "name": "arv-vscode",
-  "displayName": "Agent Review (arv)",
+  "name": "agentreview-vscode",
+  "displayName": "AgentReview (ARV)",
   "description": "AI code review workflow — review threads anchored to code regions",
-  "version": "0.4.2",
-  "publisher": "arv",
+  "version": "0.1.0",
+  "publisher": "agentreview",
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejaskash/agentreview.git",
+    "directory": "packages/vscode"
+  },
+  "categories": ["AI", "Chat", "Other"],
   "activationEvents": [
+    "onStartupFinished",
     "workspaceContains:**/.agentreview/session.json"
   ],
   "main": "./dist/extension.js",
@@ -17,7 +25,7 @@
       "activitybar": [
         {
           "id": "arv",
-          "title": "Agent Review",
+          "title": "AgentReview",
           "icon": "media/icons/arv-activity.svg"
         }
       ]
@@ -62,6 +70,10 @@
       {
         "command": "arv.endSession",
         "title": "ARV: End Review Session"
+      },
+      {
+        "command": "arv.installSkill",
+        "title": "ARV: Install Claude Code Skill"
       },
       {
         "command": "arv.bulkResolveGroup",

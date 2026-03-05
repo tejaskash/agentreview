@@ -12,6 +12,7 @@ import { addThread } from "./commands/add-thread.js";
 import { exportBundle } from "./commands/export-bundle.js";
 import { applyPatchCommand } from "./commands/apply-patch.js";
 import { showStatus } from "./commands/show-status.js";
+import { installSkill } from "./commands/install-skill.js";
 
 let manager: BridgeManager | undefined;
 let treeProvider: ArvTreeProvider | undefined;
@@ -217,6 +218,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       }
     }),
 
+    // Install Claude Code skill
+    vscode.commands.registerCommand("arv.installSkill", () => installSkill()),
+
     // End session
     vscode.commands.registerCommand("arv.endSession", async () => {
       const bridge = await manager!.pickBridge("Select repo to end session");
@@ -238,6 +242,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       }
     })
   );
+
+  // Auto-install Claude Code skill (fire-and-forget)
+  installSkill(true, context);
 
   // Disposables
   context.subscriptions.push({

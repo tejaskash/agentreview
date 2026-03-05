@@ -1,6 +1,6 @@
 import chalk from "chalk";
-import { loadSession } from "agentreview/session";
-import { getDiff, getDiffStat } from "agentreview/git";
+import { loadSession } from "../../core/session.js";
+import { getDiff, getDiffStat } from "../../core/git.js";
 
 export async function diffCommand(
   repoRoot: string,

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { CoreBridge } from "../../src/core-bridge.js";
-import { createTestRepo, cleanupTestRepo } from "../../../cli/tests/helpers.js";
+import { createTestRepo, cleanupTestRepo } from "../helpers.js";
 import { createSession } from "agentreview/session";
 import { addThread } from "agentreview/threads";
 import { createAnchor } from "agentreview/anchors";

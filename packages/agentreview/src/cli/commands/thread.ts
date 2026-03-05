@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { createAnchor } from "agentreview/anchors";
+import { createAnchor } from "../../core/anchors.js";
 import {
   addThread,
   replyToThread,
@@ -8,8 +8,8 @@ import {
   resolveThread,
   reopenThread,
   bulkResolveThreads,
-} from "agentreview/threads";
-import type { Severity, ThreadStatus, MessageRole } from "agentreview";
+} from "../../core/threads.js";
+import type { Severity, ThreadStatus, MessageRole } from "../../core/types.js";
 
 export function threadAddCommand(
   repoRoot: string,

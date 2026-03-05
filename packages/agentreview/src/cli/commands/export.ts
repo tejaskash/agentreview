@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import chalk from "chalk";
-import { generateExportBundle, saveRunRecord } from "agentreview/export";
+import { generateExportBundle, saveRunRecord } from "../../core/export.js";
 
 export async function exportCommand(
   repoRoot: string,
